@@ -43,6 +43,7 @@
                 <TextBlock Margin="0,20,0,0" Text="Basic functions" Style="{StaticResource SubheaderTextBlockStyle}" />
                 <Button Content="Pulse" HorizontalAlignment="Stretch" Command="{Binding SendPulseCommand}" />
                 <Button Content="Startup" HorizontalAlignment="Stretch" Command="{Binding SendStartupCommand}" />
+                <Button Content="Turn Off" HorizontalAlignment="Stretch" Command="{Binding TurnOffCommand}" />
             </StackPanel>
         </StackPanel>
     </Grid>

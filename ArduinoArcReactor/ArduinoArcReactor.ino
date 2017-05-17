@@ -1,3 +1,30 @@
+/*
+* ArcReactor
+*
+* Copyright (C) Marcin Badurowicz <m at badurowicz dot net> 2017
+*
+*
+* Permission is hereby granted, free of charge, to any person obtaining
+* a copy of this software and associated documentation files
+* (the "Software"), to deal in the Software without restriction,
+* including without limitation the rights to use, copy, modify, merge,
+* publish, distribute, sublicense, and/or sell copies of the Software,
+* and to permit persons to whom the Software is furnished to do so,
+* subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+* BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+* ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+* CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
 #include "ColorPulser.h"
@@ -21,10 +48,9 @@ uint32_t cyan_dim = strip.Color(CYAN_R / 8, CYAN_G / 8, CYAN_B / 8);
 uint32_t halfWhite = strip.Color(150, 255, 255);
 uint32_t white = strip.Color(255, 255, 255);
 
-
 void core(uint32_t color)
 {
-	//strip.setPixelColor(CORE_LED, color);  
+	//strip.setPixelColor(CORE_LED, color);
 	//strip.show();
 }
 
@@ -41,8 +67,6 @@ void ring(uint32_t color, uint32_t wait = 0)
 	}
 	strip.show();
 }
-
-
 
 void corePulse()
 {
@@ -133,8 +157,8 @@ void loop()
 	if (strcmp(buffer, "pulse") == 0)
 		ringPulse();
 
+	if (strcmp(buffer, "black") == 0)
+		ring(black);
+
 	delay(150);
 }
-
-
-

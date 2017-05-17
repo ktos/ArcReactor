@@ -37,7 +37,7 @@ using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
 // ########################################################################## //
-namespace ArcReactor
+namespace ArcReactor.Services
 {
     internal class BluetoothService
     {

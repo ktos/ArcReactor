@@ -29,6 +29,7 @@
 
 #endregion License
 
+using ArcReactor.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -121,6 +122,14 @@ namespace ArcReactor.ViewModels
             => _sendStartupCommand ?? (_sendStartupCommand = new DelegateCommand(async () =>
             {
                 await bs.WriteAsync("startup");
+            }, () => true));
+
+        private DelegateCommand _turnOffCommand;
+
+        public DelegateCommand TurnOffCommand
+            => _turnOffCommand ?? (_turnOffCommand = new DelegateCommand(async () =>
+            {
+                await bs.WriteAsync("black");
             }, () => true));
 
         private async Task MessageBox(string text)
