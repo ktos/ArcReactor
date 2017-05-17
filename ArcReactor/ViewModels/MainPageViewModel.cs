@@ -1,11 +1,38 @@
-﻿using System.Collections.Generic;
+﻿#region License
+
+/*
+ * ArcReactor
+ *
+ * Copyright (C) Marcin Badurowicz <m at badurowicz dot net> 2017
+ *
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files
+ * (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#endregion License
+
 using System;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Template10.Mvvm;
-using Template10.Services.NavigationService;
-using Windows.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
 using Windows.Devices.Enumeration;
 using Windows.UI.Popups;
 
@@ -35,7 +62,6 @@ namespace ArcReactor.ViewModels
             }
         }
 
-
         private bool isConnected;
 
         public bool IsConnected
@@ -57,8 +83,8 @@ namespace ArcReactor.ViewModels
             }
         }
 
+        private DelegateCommand _connectCommand;
 
-        DelegateCommand _connectCommand;
         public DelegateCommand ConnectCommand
             => _connectCommand ?? (_connectCommand = new DelegateCommand(async () =>
             {
@@ -75,21 +101,22 @@ namespace ArcReactor.ViewModels
                     }
                     else
                     {
-                        
                     }
                 }
 
                 IsConnected = bs.IsConnected;
             }, () => true));
 
-        DelegateCommand _sendPulseCommand;
+        private DelegateCommand _sendPulseCommand;
+
         public DelegateCommand SendPulseCommand
             => _sendPulseCommand ?? (_sendPulseCommand = new DelegateCommand(async () =>
             {
                 await bs.WriteAsync("pulse");
             }, () => true));
 
-        DelegateCommand _sendStartupCommand;
+        private DelegateCommand _sendStartupCommand;
+
         public DelegateCommand SendStartupCommand
             => _sendStartupCommand ?? (_sendStartupCommand = new DelegateCommand(async () =>
             {
@@ -101,7 +128,6 @@ namespace ArcReactor.ViewModels
             var m = new MessageDialog(text);
             await m.ShowAsync();
         }
-
 
         private string connectButtonDescription = "Connect";
 
@@ -122,7 +148,6 @@ namespace ArcReactor.ViewModels
             }
         }
 
-
         public MainPageViewModel()
         {
             if (Windows.ApplicationModel.DesignMode.DesignModeEnabled)
@@ -142,7 +167,5 @@ namespace ArcReactor.ViewModels
                 BluetoothSerialDevices.Add(item);
             }
         }
-
-
     }
 }
