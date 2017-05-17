@@ -84,53 +84,41 @@ namespace ArcReactor.ViewModels
             }
         }
 
-        private DelegateCommand _connectCommand;
-
-        public DelegateCommand ConnectCommand
-            => _connectCommand ?? (_connectCommand = new DelegateCommand(async () =>
+        public async Task Connect()
+        {
+            if (bs.IsConnected)
             {
-                if (bs.IsConnected)
+                bs.Disconnect();
+            }
+            else
+            {
+                var result = await bs.ConnectAsync(SelectedDevice);
+                if (!result)
                 {
-                    bs.Disconnect();
+                    await MessageBox("Connection failed");
                 }
                 else
                 {
-                    var result = await bs.ConnectAsync(SelectedDevice);
-                    if (!result)
-                    {
-                        await MessageBox("Connection failed");
-                    }
-                    else
-                    {
-                    }
                 }
+            }
 
-                IsConnected = bs.IsConnected;
-            }, () => true));
+            IsConnected = bs.IsConnected;
+        }
 
-        private DelegateCommand _sendPulseCommand;
+        public async void SendPulse()
+        {
+            await bs.WriteAsync("pulse");
+        }
 
-        public DelegateCommand SendPulseCommand
-            => _sendPulseCommand ?? (_sendPulseCommand = new DelegateCommand(async () =>
-            {
-                await bs.WriteAsync("pulse");
-            }, () => true));
+        public async void SendStartup()
+        {
+            await bs.WriteAsync("startup");
+        }
 
-        private DelegateCommand _sendStartupCommand;
-
-        public DelegateCommand SendStartupCommand
-            => _sendStartupCommand ?? (_sendStartupCommand = new DelegateCommand(async () =>
-            {
-                await bs.WriteAsync("startup");
-            }, () => true));
-
-        private DelegateCommand _turnOffCommand;
-
-        public DelegateCommand TurnOffCommand
-            => _turnOffCommand ?? (_turnOffCommand = new DelegateCommand(async () =>
-            {
-                await bs.WriteAsync("black");
-            }, () => true));
+        public async void SendBlack()
+        {
+            await bs.WriteAsync("black");
+        }
 
         private async Task MessageBox(string text)
         {
@@ -163,10 +151,10 @@ namespace ArcReactor.ViewModels
                 return;
 
             bs = new BluetoothService();
-            PopulateDevicesList();
+            RefreshDevicesList();
         }
 
-        public async Task PopulateDevicesList()
+        public async Task RefreshDevicesList()
         {
             BluetoothSerialDevices = new ObservableCollection<DeviceInformation>();
 
@@ -176,5 +164,8 @@ namespace ArcReactor.ViewModels
                 BluetoothSerialDevices.Add(item);
             }
         }
+
+        public void GotoAbout() =>
+            NavigationService.Navigate(typeof(Views.AboutPage));
     }
 }

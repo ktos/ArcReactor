@@ -37,15 +37,25 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Content="{Binding ConnectButtonDescription}" HorizontalAlignment="Stretch" x:Name="btnConnect" Command="{Binding ConnectCommand}" />
+            <Button Content="{Binding ConnectButtonDescription}" HorizontalAlignment="Stretch" x:Name="btnConnect" Click="{x:Bind ViewModel.Connect}" />
 
             <StackPanel x:Name="spBasic" Visibility="{Binding IsConnected, Converter={StaticResource VisibleWhenTrueConverter}}">
-                <TextBlock Margin="0,20,0,0" Text="Basic functions" Style="{StaticResource SubheaderTextBlockStyle}" />
-                <Button Content="Pulse" HorizontalAlignment="Stretch" Command="{Binding SendPulseCommand}" />
-                <Button Content="Startup" HorizontalAlignment="Stretch" Command="{Binding SendStartupCommand}" />
-                <Button Content="Turn Off" HorizontalAlignment="Stretch" Command="{Binding TurnOffCommand}" />
+                <TextBlock Margin="0,20,0,0" Text="Basic functions" Style="{StaticResource TitleTextBlockStyle}" />
+                <Button Content="Pulse" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendPulse}" />
+                <Button Content="Startup" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendStartup}" />
+                <Button Content="Turn Off" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendBlack}" />
             </StackPanel>
         </StackPanel>
     </Grid>
 
+    <Page.BottomAppBar>
+        <CommandBar>
+            <AppBarButton Label="Refresh" Icon="Refresh" Click="{x:Bind ViewModel.RefreshDevicesList}" />
+
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="about" Click="{x:Bind ViewModel.GotoAbout}" />
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+    
 </Page>

@@ -1,0 +1,72 @@
+<Page x:Class="ArcReactor.Views.AboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:Behaviors="using:Template10.Behaviors"
+      xmlns:Core="using:Microsoft.Xaml.Interactions.Core"
+      xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
+      xmlns:controls="using:Template10.Controls"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="using:TemperatureApp.Views"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:vm="using:ArcReactor.ViewModels"
+      mc:Ignorable="d">
+
+    <Page.DataContext>
+        <vm:AboutPageViewModel x:Name="ViewModel" />
+    </Page.DataContext>
+
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+        <!--  content  -->
+        <Pivot x:Name="MyPivot"               
+               EntranceNavigationTransitionInfo.IsTargetElement="True">
+
+            <!--  about  -->
+            <PivotItem Header="About">
+                <RelativePanel>
+
+                    <Border x:Name="LogoImage"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            BorderBrush="DimGray"
+                            BorderThickness="1"
+                            IsHitTestVisible="False"
+                            RelativePanel.AlignRightWithPanel="True"
+                            RelativePanel.AlignTopWithPanel="True">
+                        <Border.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" />
+                        </Border.Background>
+                        <Image Margin="12"
+                               Source="{Binding Logo}"
+                               Stretch="None" />
+                    </Border>
+
+                    <TextBlock x:Name="DisplayNameTextBlock"
+                               Margin="0,0,0,12"
+                               FontSize="24"
+                               RelativePanel.AlignLeftWithPanel="True"
+                               RelativePanel.AlignRightWith="LogoImage"
+                               RelativePanel.AlignTopWithPanel="True"
+                               Text="{Binding DisplayName}" />
+
+                    <TextBlock x:Name="PublisherTextBlock"
+                               RelativePanel.AlignLeftWithPanel="True"
+                               RelativePanel.Below="DisplayNameTextBlock"
+                               Text="{Binding Publisher}" />
+
+                    <TextBlock x:Name="VersionTextBlock"
+                               RelativePanel.AlignLeftWithPanel="True"
+                               RelativePanel.Below="PublisherTextBlock">
+                        <Run>Version</Run>
+                        <Run Text="{Binding Version}" />
+                    </TextBlock>
+
+                </RelativePanel>
+            </PivotItem>
+        </Pivot>
+
+    </Grid>
+
+</Page>
+
