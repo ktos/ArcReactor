@@ -96,7 +96,9 @@ namespace ArcReactor.ViewModels
             }
             else
             {
+                Views.Busy.SetBusy(true, "Connecting...");
                 var result = await bs.ConnectAsync(SelectedDevice);
+                Views.Busy.SetBusy(false);
                 if (!result)
                 {
                     await MessageBox("Connection failed");

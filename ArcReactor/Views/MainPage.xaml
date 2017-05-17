@@ -27,6 +27,18 @@
                 <Visibility>Collapsed</Visibility>
             </converters:ValueWhenConverter.Otherwise>
         </converters:ValueWhenConverter>
+
+        <converters:ValueWhenConverter x:Key="NegationConverter">
+            <converters:ValueWhenConverter.When>
+                <x:Boolean>True</x:Boolean>
+            </converters:ValueWhenConverter.When>
+            <converters:ValueWhenConverter.Value>
+                <x:Boolean>False</x:Boolean>
+            </converters:ValueWhenConverter.Value>
+            <converters:ValueWhenConverter.Otherwise>
+                <x:Boolean>True</x:Boolean>
+            </converters:ValueWhenConverter.Otherwise>
+        </converters:ValueWhenConverter>
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -112,7 +124,7 @@
 
     <Page.BottomAppBar>
         <CommandBar>
-            <AppBarButton Label="Refresh" Icon="Refresh" Click="{x:Bind ViewModel.RefreshDevicesList}" />
+            <AppBarButton Label="Refresh" Icon="Refresh" Click="{x:Bind ViewModel.RefreshDevicesList}" IsEnabled="{Binding IsConnected, Converter={StaticResource NegationConverter}}" />
 
             <CommandBar.SecondaryCommands>
                 <AppBarButton Label="about" Click="{x:Bind ViewModel.GotoAbout}" />
