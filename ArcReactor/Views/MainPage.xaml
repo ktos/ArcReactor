@@ -4,6 +4,7 @@
       xmlns:Core="using:Microsoft.Xaml.Interactions.Core"
       xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
       xmlns:controls="using:Template10.Controls"
+      xmlns:converters="using:Template10.Converters"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="using:ArcReactor.Views"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -13,21 +14,35 @@
         <vm:MainPageViewModel x:Name="ViewModel" />
     </Page.DataContext>
 
+    <Page.Resources>
+        <converters:ValueWhenConverter x:Key="VisibleWhenTrueConverter">
+            <converters:ValueWhenConverter.When>
+                <x:Boolean>True</x:Boolean>
+            </converters:ValueWhenConverter.When>
+            <converters:ValueWhenConverter.Value>
+                <Visibility>Visible</Visibility>
+            </converters:ValueWhenConverter.Value>
+            <converters:ValueWhenConverter.Otherwise>
+                <Visibility>Collapsed</Visibility>
+            </converters:ValueWhenConverter.Otherwise>
+        </converters:ValueWhenConverter>
+    </Page.Resources>
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <StackPanel>
-            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch">
+            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch" ItemsSource="{Binding BluetoothSerialDevices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Content="Connect" HorizontalAlignment="Stretch" x:Name="btnConnect" Click="btnConnect_Click" />
+            <Button Content="{Binding ConnectButtonDescription}" HorizontalAlignment="Stretch" x:Name="btnConnect" Command="{Binding ConnectCommand}" />
 
-            <StackPanel x:Name="spBasic" Visibility="Collapsed">
+            <StackPanel x:Name="spBasic" Visibility="{Binding IsConnected, Converter={StaticResource VisibleWhenTrueConverter}}">
                 <TextBlock Margin="0,20,0,0" Text="Basic functions" Style="{StaticResource SubheaderTextBlockStyle}" />
-                <Button Content="Pulse" HorizontalAlignment="Stretch" Click="SendPulse" />
-                <Button Content="Startup" HorizontalAlignment="Stretch" Click="SendStartup" />
+                <Button Content="Pulse" HorizontalAlignment="Stretch" Command="{Binding SendPulseCommand}" />
+                <Button Content="Startup" HorizontalAlignment="Stretch" Command="{Binding SendStartupCommand}" />
             </StackPanel>
         </StackPanel>
     </Grid>
