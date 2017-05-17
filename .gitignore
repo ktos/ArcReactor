@@ -115,3 +115,5 @@ project.lock.json
 
 # Visual Micro
 /*/__vm
+
+.vs/*
