@@ -112,3 +112,6 @@ UpgradeLog*.XML
 *.sln.ide
 
 project.lock.json
+
+# Visual Micro
+/*/__vm
