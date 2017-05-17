@@ -40,5 +40,12 @@ namespace ArcReactor.Views
             InitializeComponent();
             NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
         }
+
+
+        private void ApplyButtonClick(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            // dirty hack, because MVVM in this case is too complex for me
+            (DataContext as ViewModels.MainPageViewModel).ApplyColorCommand.Execute((sender as Button).DataContext as Models.LedColor);
+        }
     }
 }

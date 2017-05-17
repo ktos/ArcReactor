@@ -1,0 +1,11 @@
+﻿<vm:MainPageViewModel
+    xmlns:vm="using:ArcReactor.ViewModels"
+    xmlns:m="using:ArcReactor.Models">
+
+    <vm:MainPageViewModel.ConnectButtonDescription>Connect</vm:MainPageViewModel.ConnectButtonDescription>
+    <vm:MainPageViewModel.IsConnected>True</vm:MainPageViewModel.IsConnected>
+    <vm:MainPageViewModel.LedColors>
+        
+    </vm:MainPageViewModel.LedColors>
+    
+</vm:MainPageViewModel>

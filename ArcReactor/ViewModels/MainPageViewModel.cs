@@ -29,8 +29,10 @@
 
 #endregion License
 
+using ArcReactor.Models;
 using ArcReactor.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Template10.Mvvm;
@@ -43,6 +45,8 @@ namespace ArcReactor.ViewModels
     {
         private BluetoothService bs;
         public ObservableCollection<DeviceInformation> BluetoothSerialDevices { get; set; }
+
+        public List<LedColor> LedColors { get; set; }
 
         private DeviceInformation selectedDevice;
 
@@ -105,6 +109,19 @@ namespace ArcReactor.ViewModels
             IsConnected = bs.IsConnected;
         }
 
+        public void CopyFirstLed()
+        {
+            for (int i = 1; i < LED_COUNTER; i++)
+            {
+                LedColors[i].SetRgb(LedColors[0].R, LedColors[0].G, LedColors[0].B);
+            }
+        }
+
+        public void ApplyAll()
+        {
+            throw new NotImplementedException();
+        }
+
         public async void SendPulse()
         {
             await bs.WriteAsync("pulse");
@@ -127,6 +144,7 @@ namespace ArcReactor.ViewModels
         }
 
         private string connectButtonDescription = "Connect";
+        private const int LED_COUNTER = 20;
 
         public string ConnectButtonDescription
         {
@@ -152,6 +170,29 @@ namespace ArcReactor.ViewModels
 
             bs = new BluetoothService();
             RefreshDevicesList();
+
+            CreateLedList();
+        }
+
+        private DelegateCommand<LedColor> _applyColorCommand;
+
+        public DelegateCommand<LedColor> ApplyColorCommand
+            => _applyColorCommand ?? (_applyColorCommand = new DelegateCommand<LedColor>(ApplyColorCommandExecute, ApplyColorCommandCanExecute));
+
+        private bool ApplyColorCommandCanExecute(LedColor param) => true;
+
+        private async void ApplyColorCommandExecute(LedColor param)
+        {
+            await bs.WriteAsync(param.ToDeviceCommand());
+        }
+
+        public void CreateLedList()
+        {
+            LedColors = new List<LedColor>();
+            for (int i = 0; i < LED_COUNTER; i++)
+            {
+                LedColors.Add(new LedColor { Index = i, R = 190, G = 100, B = 20 });
+            }
         }
 
         public async Task RefreshDevicesList()

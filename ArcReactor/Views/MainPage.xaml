@@ -1,4 +1,4 @@
-﻿<Page x:Class="ArcReactor.Views.MainPage"
+﻿<Page x:Class="ArcReactor.Views.MainPage"      
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:Core="using:Microsoft.Xaml.Interactions.Core"
@@ -8,6 +8,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="using:ArcReactor.Views"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      d:DataContext="{d:DesignData ../DesignData/SampleMainPageViewModel.xaml}"
       xmlns:vm="using:ArcReactor.ViewModels" mc:Ignorable="d">
 
     <Page.DataContext>
@@ -29,8 +30,13 @@
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <StackPanel>
-            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch" ItemsSource="{Binding BluetoothSerialDevices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="100" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch" ItemsSource="{Binding BluetoothSerialDevices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}" Grid.Row="0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" />
@@ -38,14 +44,70 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <Button Content="{Binding ConnectButtonDescription}" HorizontalAlignment="Stretch" x:Name="btnConnect" Click="{x:Bind ViewModel.Connect}" />
-
-            <StackPanel x:Name="spBasic" Visibility="{Binding IsConnected, Converter={StaticResource VisibleWhenTrueConverter}}">
-                <TextBlock Margin="0,20,0,0" Text="Basic functions" Style="{StaticResource TitleTextBlockStyle}" />
-                <Button Content="Pulse" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendPulse}" />
-                <Button Content="Startup" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendStartup}" />
-                <Button Content="Turn Off" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendBlack}" />
-            </StackPanel>
         </StackPanel>
+
+        <Pivot Grid.Row="1" Visibility="{Binding IsConnected, Converter={StaticResource VisibleWhenTrueConverter}}">
+            <!--  about  -->
+            <PivotItem Header="Basic functions">
+                <StackPanel>
+                    <Button Content="Pulse" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendPulse}" />
+                    <Button Content="Startup" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendStartup}" />
+                    <Button Content="Turn Off" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendBlack}" />
+                </StackPanel>
+            </PivotItem>
+
+            <PivotItem Header="Colors">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Grid.Row="0">
+                        <Button Content="Copy first to all" Margin="0,0,10,0" Click="{x:Bind ViewModel.CopyFirstLed}" />
+                        <Button Content="Apply all" Margin="0,0,10,0" Click="{x:Bind ViewModel.ApplyAll}" />
+                    </StackPanel>
+                    
+                    <ScrollViewer IsVerticalRailEnabled="True" Grid.Row="1">
+                        <ListView ItemsSource="{Binding LedColors}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,10">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="30" />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition MaxWidth="200" />
+                                            <ColumnDefinition MaxWidth="100" />
+                                            <ColumnDefinition Width="20" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Color}" Style="{StaticResource SubtitleTextBlockStyle}" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Index}" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
+
+                                        <StackPanel Grid.Column="0" Grid.Row="1">
+                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="255" Value="{Binding R, Mode=TwoWay}" Foreground="Red" />
+                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="255" Value="{Binding G, Mode=TwoWay}" Foreground="Green" />
+                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="255" Value="{Binding B, Mode=TwoWay}" Foreground="Blue" />
+                                        </StackPanel>
+
+                                        <Button Grid.Column="1" Grid.Row="1" Content="Apply" Margin="10,0,0,0" VerticalAlignment="Center" Click="ApplyButtonClick" />
+
+                                        <Rectangle Grid.Column="2" Grid.RowSpan="2" Width="20" Margin="10,5,0,5">
+                                            <Rectangle.Fill>
+                                                <SolidColorBrush Color="{Binding Color}" />
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </ScrollViewer>
+                </Grid>
+            </PivotItem>
+        </Pivot>
     </Grid>
 
     <Page.BottomAppBar>
@@ -57,5 +119,4 @@
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>
-    
 </Page>
