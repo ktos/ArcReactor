@@ -13,17 +13,23 @@
         <vm:MainPageViewModel x:Name="ViewModel" />
     </Page.DataContext>
 
-    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel>
+            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Content="Connect" HorizontalAlignment="Stretch" x:Name="btnConnect" Click="btnConnect_Click" />
 
-        <controls:PageHeader x:Name="pageHeader" Content="Main Page"
-                             RelativePanel.AlignLeftWithPanel="True"
-                             RelativePanel.AlignRightWithPanel="True"
-                             RelativePanel.AlignTopWithPanel="True" />
-
-        <TextBlock x:Name="mainTextBlock" Margin="16,12,0,0"
-                   RelativePanel.AlignLeftWithPanel="True"
-                   RelativePanel.Below="pageHeader" Text="Hello World" />
-
-    </RelativePanel>
+            <StackPanel x:Name="spBasic" Visibility="Collapsed">
+                <TextBlock Margin="0,20,0,0" Text="Basic functions" Style="{StaticResource SubheaderTextBlockStyle}" />
+                <Button Content="Pulse" HorizontalAlignment="Stretch" Click="SendPulse" />
+                <Button Content="Startup" HorizontalAlignment="Stretch" Click="SendStartup" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
 
 </Page>
