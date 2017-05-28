@@ -122,10 +122,12 @@ void startUp()
 
 void everyindividual()
 {
+	int ledindex = 0;
 	int index = 1;
-	while (index < bufflen) {
-		strip.setPixelColor(index - 1, strip.Color(buffer[index], buffer[index + 1], buffer[index + 2]));
+	while (index <= bufflen) {
+		strip.setPixelColor(ledindex, strip.Color(buffer[index], buffer[index + 1], buffer[index + 2]));
 		index += 3;
+		ledindex++;
 	}
 
 	strip.show();
