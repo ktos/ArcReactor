@@ -157,7 +157,7 @@ namespace ArcReactor.ViewModels
         }
 
         private string connectButtonDescription = "Connect";
-        private const int LED_COUNTER = 20;
+        private const int LED_COUNTER = 24;
 
         public string ConnectButtonDescription
         {
@@ -204,7 +204,7 @@ namespace ArcReactor.ViewModels
             LedColors = new List<LedColor>();
             for (int i = 0; i < LED_COUNTER; i++)
             {
-                LedColors.Add(new LedColor { Index = i, R = 190, G = 100, B = 20 });
+                LedColors.Add(new LedColor { Index = i, R = 127, G = 100, B = 20 });
             }
         }
 
