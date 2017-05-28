@@ -34,6 +34,7 @@ using ArcReactor.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Threading.Tasks;
 using Template10.Mvvm;
 using Windows.Devices.Enumeration;
@@ -119,11 +120,6 @@ namespace ArcReactor.ViewModels
             }
         }
 
-        public void ApplyAll()
-        {
-            throw new NotImplementedException();
-        }
-
         public async void SendPulse()
         {
             await bs.WriteAsync("pulse");
@@ -137,6 +133,21 @@ namespace ArcReactor.ViewModels
         public async void SendBlack()
         {
             await bs.WriteAsync("black");
+        }
+
+        public async void SendLeds()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("i");
+
+            for (int i = 0; i < LED_COUNTER; i++)
+            {
+                sb.Append((char)LedColors[i].R);
+                sb.Append((char)LedColors[i].G);
+                sb.Append((char)LedColors[i].B);
+            }
+
+            await bs.WriteAsync(sb.ToString());
         }
 
         private async Task MessageBox(string text)

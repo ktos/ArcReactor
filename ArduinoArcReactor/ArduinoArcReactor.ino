@@ -48,6 +48,9 @@ uint32_t cyan_dim = strip.Color(CYAN_R / 8, CYAN_G / 8, CYAN_B / 8);
 uint32_t halfWhite = strip.Color(150, 255, 255);
 uint32_t white = strip.Color(255, 255, 255);
 
+char buffer[100] = "startup";
+uint8_t bufflen = 7;
+
 void core(uint32_t color)
 {
 	//strip.setPixelColor(CORE_LED, color);
@@ -125,6 +128,23 @@ void startUp()
 	}
 }
 
+void everyindividual()
+{
+	int index = 1;
+	while (index < bufflen) {
+		strip.setPixelColor(index - 1, strip.Color(buffer[index], buffer[index + 1], buffer[index + 2]));
+		index += 3;
+	}
+
+	strip.show();
+}
+
+void individual()
+{
+	strip.setPixelColor(buffer[1], strip.Color(buffer[2], buffer[3], buffer[4]));
+	strip.show();
+}
+
 void setup()
 {
 	Serial.begin(9600);
@@ -133,8 +153,6 @@ void setup()
 	strip.begin();
 	strip.show();
 }
-
-char buffer[100] = "startup";
 
 void loop()
 {
@@ -148,6 +166,8 @@ void loop()
 		}
 		buffer[index] = 0;
 
+		bufflen = index - 1;
+
 		Serial.println(buffer);
 	}
 
@@ -159,6 +179,12 @@ void loop()
 
 	if (strcmp(buffer, "black") == 0)
 		ring(black);
+
+	if (buffer[0] == 'i')
+		everyindividual();
+
+	if (buffer[0] == 'c')
+		individual();
 
 	delay(150);
 }

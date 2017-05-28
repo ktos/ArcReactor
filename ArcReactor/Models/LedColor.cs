@@ -135,7 +135,14 @@ namespace ArcReactor.Models
 
         public string ToDeviceCommand()
         {
-            return $"c {Index} {R:D3} {G:D3} {B:D3}";
+            StringBuilder sb = new StringBuilder();
+            sb.Append("c");
+            sb.Append((char)Index);
+            sb.Append((char)R);
+            sb.Append((char)G);
+            sb.Append((char)B);
+
+            return sb.ToString();
         }
 
 

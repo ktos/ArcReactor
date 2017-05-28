@@ -77,7 +77,7 @@
 
                     <StackPanel Orientation="Horizontal" Grid.Row="0">
                         <Button Content="Copy first to all" Margin="0,0,10,0" Click="{x:Bind ViewModel.CopyFirstLed}" />
-                        <Button Content="Apply all" Margin="0,0,10,0" Click="{x:Bind ViewModel.ApplyAll}" />
+                        <Button Content="Apply all" Margin="0,0,10,0" Click="{x:Bind ViewModel.SendLeds}" />
                     </StackPanel>
                     
                     <ScrollViewer IsVerticalRailEnabled="True" Grid.Row="1">
