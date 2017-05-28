@@ -115,17 +115,9 @@ void startUp()
 {
 	core(cyan);
 
-	for (int16_t j = 0; j < 3; j++)
-	{
-		delay(1000);
-
-		const uint32_t wait = 25;
-
-		ring(cyan_dim, wait);
-		delay(1000);
-
-		ring(black, wait);
-	}
+	ring(cyan_dim, 25);
+	delay(1000);
+	ring(black, 25);	
 }
 
 void everyindividual()
