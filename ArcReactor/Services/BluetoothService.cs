@@ -30,6 +30,8 @@
 #endregion License
 
 using System;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
@@ -82,6 +84,8 @@ namespace ArcReactor.Services
             _btWriter = new DataWriter(socket.OutputStream);
             _btReader.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
             _btWriter.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
+
+            _btReader.InputStreamOptions = InputStreamOptions.Partial;
             return true;
         }
 
@@ -102,41 +106,63 @@ namespace ArcReactor.Services
         }
 
         // ------------------------------------------------------------------ //
-        public async Task<String> ReadAsync()
+        public async Task<String> ReadAsync(CancellationToken cancellationToken)
         {
             if (!IsConnected) { return null; }
-            var receivedStrings = "";
-            try
-            {
-                uint size = await _btReader.LoadAsync(sizeof(uint));
-                if (size < sizeof(uint))
-                {
-                    Disconnect();
-                    return null;
-                }
 
-                while (_btReader.UnconsumedBufferLength > 0)
-                {
-                    uint bytesToRead = _btReader.ReadUInt32();
-                    receivedStrings += _btReader.ReadString(bytesToRead) + "\n";
-                }
+            Task<UInt32> loadAsyncTask;
 
-                return receivedStrings;
-            }
-            catch (Exception ex)
-            {
+            uint ReadBufferLength = 10;
+
+            // If task cancellation was requested, comply
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
+            _btReader.InputStreamOptions = InputStreamOptions.Partial;
+
+            // Create a task object to wait for data on the serialPort.InputStream
+
+            if (cancellationToken.IsCancellationRequested)
                 return null;
+
+            loadAsyncTask = _btReader.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
+
+            // Launch the task and wait
+            UInt32 bytesRead = await loadAsyncTask;
+            if (bytesRead > 0)
+            {
+                try
+                {
+                    string recvdtxt = _btReader.ReadString(bytesRead);
+                    return recvdtxt;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("ReadAsync: " + ex.Message);
+                }
+
             }
+
+            return null;
+
         }
 
         // ------------------------------------------------------------------ //
         public async void Disconnect()
         {
-            await socket.CancelIOAsync();
-            socket.Dispose();
-            socket = null;
-
-            IsConnected = false;
+            try
+            {
+                await socket.CancelIOAsync();
+                socket.Dispose();
+                socket = null;
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            finally
+            {
+                IsConnected = false;
+            }
         }
 
         // ------------------------------------------------------------------ //

@@ -35,6 +35,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Template10.Mvvm;
 using Windows.Devices.Enumeration;
@@ -67,6 +68,27 @@ namespace ArcReactor.ViewModels
                 }
             }
         }
+
+
+        private float batteryLevel;
+
+        public float BatteryLevel
+        {
+            get
+            {
+                return batteryLevel;
+            }
+
+            set
+            {
+                if (this.batteryLevel != value)
+                {
+                    batteryLevel = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
 
         private bool isConnected;
 
@@ -117,6 +139,33 @@ namespace ArcReactor.ViewModels
             for (int i = 1; i < LED_COUNTER; i++)
             {
                 LedColors[i].SetRgb(LedColors[0].R, LedColors[0].G, LedColors[0].B);
+            }
+        }
+
+        public async void GetBatteryLevel()
+        {
+            await bs.WriteAsync("batt");
+            await Task.Delay(2000);
+            var cts = new CancellationTokenSource(5000);
+
+            try
+            {
+                var result = await bs.ReadAsync(cts.Token);
+
+                while (string.IsNullOrEmpty(result) || result.Length != 4)
+                {
+                    result = await bs.ReadAsync(cts.Token);
+                }
+
+                BatteryLevel = float.Parse(result);
+            }
+            catch (TaskCanceledException)
+            {
+                BatteryLevel = float.NaN;
+            }
+            catch (ObjectDisposedException)
+            {
+                Connect();
             }
         }
 

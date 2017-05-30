@@ -51,6 +51,8 @@ uint32_t white = strip.Color(255, 255, 255);
 char buffer[100] = "startup";
 uint8_t bufflen = 7;
 
+const float AREF = 5.0;
+
 void core(uint32_t color)
 {
 	//strip.setPixelColor(CORE_LED, color);
@@ -124,7 +126,7 @@ void everyindividual()
 {
 	int ledindex = 0;
 	int index = 1;
-	while (index <= bufflen) {
+	while (ledindex < LEDS) {
 		strip.setPixelColor(ledindex, strip.Color(buffer[index], buffer[index + 1], buffer[index + 2]));
 		index += 3;
 		ledindex++;
@@ -139,10 +141,25 @@ void individual()
 	strip.show();
 }
 
+void battery()
+{
+	int bat[2];
+	bat[0] = analogRead(A0);
+	delay(100);
+	bat[1] = analogRead(A0);
+	
+	float battery = ((bat[0] + bat[1]) / 2) / 1023.0 * AREF;	
+	BTserial.print(battery);
+
+	strcpy(buffer, "pulse");
+}
+
 void setup()
 {
 	Serial.begin(9600);
 	BTserial.begin(9600);
+
+	pinMode(A0, INPUT);
 
 	strip.begin();
 	strip.show();
@@ -173,6 +190,9 @@ void loop()
 
 	if (strcmp(buffer, "black") == 0)
 		ring(black);
+
+	if (strcmp(buffer, "batt") == 0)
+		battery();
 
 	if (buffer[0] == 'i')
 		everyindividual();

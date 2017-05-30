@@ -65,6 +65,8 @@
                     <Button Content="Pulse" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendPulse}" />
                     <Button Content="Startup" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendStartup}" />
                     <Button Content="Turn Off" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.SendBlack}" />
+                    <Button Content="Get Battery Level" HorizontalAlignment="Stretch" Click="{x:Bind ViewModel.GetBatteryLevel}" />
+                    <TextBlock Text="{Binding BatteryLevel}" />
                 </StackPanel>
             </PivotItem>
 
