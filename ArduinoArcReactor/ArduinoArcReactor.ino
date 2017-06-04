@@ -38,7 +38,7 @@
 #define CYAN_G 209
 #define CYAN_B 228
 
-SoftwareSerial BTserial(2, 3); // RX | TX
+SoftwareSerial BTserial(8, 9); // RX | TX
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -52,7 +52,7 @@ char tmpbuff[120] = "";
 char buffer[120] = "startup";
 uint8_t bufflen = 7;
 
-const float AREF = 5.0;
+const float AREF = 5.2;
 
 void core(uint32_t color)
 {
