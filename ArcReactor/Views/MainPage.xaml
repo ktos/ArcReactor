@@ -102,9 +102,9 @@
                                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Index}" Style="{StaticResource SubtitleTextBlockStyle}" HorizontalAlignment="Center" />
 
                                         <StackPanel Grid.Column="0" Grid.Row="1">
-                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="127" Value="{Binding R, Mode=TwoWay}" Foreground="Red" />
-                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="127" Value="{Binding G, Mode=TwoWay}" Foreground="Green" />
-                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="127" Value="{Binding B, Mode=TwoWay}" Foreground="Blue" />
+                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="255" Value="{Binding R, Mode=TwoWay}" Foreground="Red" />
+                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="255" Value="{Binding G, Mode=TwoWay}" Foreground="Green" />
+                                            <Slider HorizontalAlignment="Stretch" Width="200" Maximum="255" Value="{Binding B, Mode=TwoWay}" Foreground="Blue" />
                                         </StackPanel>
 
                                         <Button Grid.Column="1" Grid.Row="1" Content="Apply" Margin="10,0,0,0" VerticalAlignment="Center" Click="ApplyButtonClick" />

@@ -228,7 +228,7 @@ void loop()
 			Serial.println(tmpbuff);
 			index = 0;
 		
-			strcpy(buffer, tmpbuff);
+			memcpy(buffer, tmpbuff, 100);
 			operationMode();
 		}
 		else {

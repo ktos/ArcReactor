@@ -48,7 +48,7 @@ namespace ArcReactor.ViewModels
         private BluetoothService bs;
         public ObservableCollection<DeviceInformation> BluetoothSerialDevices { get; set; }
 
-        public List<LedColor> LedColors { get; set; }
+        public ObservableCollection<LedColor> LedColors { get; set; }
 
         private DeviceInformation selectedDevice;
 
@@ -250,10 +250,10 @@ namespace ArcReactor.ViewModels
 
         public void CreateLedList()
         {
-            LedColors = new List<LedColor>();
+            LedColors = new ObservableCollection<LedColor>();
             for (int i = 0; i < LED_COUNTER; i++)
             {
-                LedColors.Add(new LedColor { Index = i, R = 127, G = 100, B = 20 });
+                LedColors.Add(new LedColor { Index = i, R = 0, G = 0, B = 0 });
             }
         }
 
