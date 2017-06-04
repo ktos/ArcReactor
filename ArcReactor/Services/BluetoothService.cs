@@ -106,6 +106,22 @@ namespace ArcReactor.Services
             }
         }
 
+        public async Task<bool> WriteBytesAsync(byte[] data)
+        {
+            if (!IsConnected) { return false; }
+            try
+            {
+                _btWriter.WriteBytes(data);
+                _btWriter.WriteByte(10);
+                await _btWriter.StoreAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
         // ------------------------------------------------------------------ //
         public async Task<String> ReadAsync(CancellationToken cancellationToken)
         {

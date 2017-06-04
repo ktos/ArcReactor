@@ -30,9 +30,9 @@
 #include "ColorPulser.h"
 
 #define PIN 6
-#define LEDS 24
+#define LEDS 25
 #define RING_LEDS 24
-#define CORE_LED 1
+#define CORE_LED 0
 
 #define CYAN_R 58
 #define CYAN_G 209
@@ -56,13 +56,13 @@ const float AREF = 5.0;
 
 void core(uint32_t color)
 {
-	//strip.setPixelColor(CORE_LED, color);
-	//strip.show();
+	strip.setPixelColor(CORE_LED, color);
+	strip.show();
 }
 
 void ring(uint32_t color, uint32_t wait = 0)
 {
-	for (int16_t i = 0; i < RING_LEDS; i++)
+	for (int16_t i = CORE_LED + 1; i < RING_LEDS + CORE_LED + 1; i++)
 	{
 		strip.setPixelColor(i, color);
 		if (wait != 0)
@@ -95,8 +95,7 @@ void corePulse()
 }
 
 void ringPulse(int dim = 8)
-{
-	Serial.println("pulse start");
+{	
 	const uint32_t WAIT = 15;
 	int16_t count = 0;
 
@@ -113,17 +112,17 @@ void ringPulse(int dim = 8)
 			count++;
 		}
 	}
-
-	Serial.println("pulse end");
 }
 
 void startUp()
 {
-	core(cyan);
+	core(cyan_dim);
 
 	ring(cyan_dim, 25);
 	delay(1000);
-	ring(black, 25);	
+	ring(black, 25);
+
+	core(black);
 }
 
 void everyindividual()
@@ -141,7 +140,26 @@ void everyindividual()
 
 void individual()
 {
-	strip.setPixelColor(buffer[1], strip.Color(buffer[2], buffer[3], buffer[4]));
+	Serial.print("LED ");
+	Serial.print((uint16_t)buffer[1]);
+	Serial.print(" set to ");
+	Serial.print((uint8_t)buffer[2]);
+	Serial.print(',');
+	Serial.print((uint8_t)buffer[3]);
+	Serial.print(',');
+	Serial.println((uint8_t)buffer[4]);
+
+	strip.setPixelColor((uint16_t)buffer[1], strip.Color((uint8_t)buffer[2], (uint8_t)buffer[3], (uint8_t)buffer[4]));
+	strip.show();
+}
+
+void setring()
+{
+	for (int i = CORE_LED + 1; i < LEDS; i++)
+	{
+		strip.setPixelColor(i, strip.Color(buffer[1], buffer[2], buffer[3]));
+	}
+
 	strip.show();
 }
 
@@ -193,6 +211,9 @@ void operationMode()
 
 	if (buffer[0] == 'c')
 		individual();
+
+	if (buffer[0] == 'r')
+		setring();
 }
 
 void loop()

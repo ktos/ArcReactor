@@ -133,16 +133,18 @@ namespace ArcReactor.Models
             B = b;
         }
 
-        public string ToDeviceCommand()
+        public byte[] ToDeviceCommand()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("c");
-            sb.Append((char)Index);
-            sb.Append((char)R);
-            sb.Append((char)G);
-            sb.Append((char)B);
+            byte[] sb = new byte[5];
 
-            return sb.ToString();
+            sb[0] = (byte)'c';
+            sb[1] = (byte)Index;
+
+            sb[2] = (byte)R;
+            sb[3] = (byte)G;
+            sb[4] = (byte)B;
+
+            return sb;
         }
 
 
