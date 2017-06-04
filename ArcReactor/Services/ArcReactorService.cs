@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ArcReactor.Models;
 using Windows.Devices.Enumeration;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace ArcReactor.Services
 {
@@ -33,7 +34,11 @@ namespace ArcReactor.Services
 
         public void DisconnectAsync()
         {
-            throw new NotImplementedException();
+            if (bs.IsConnected)
+            {
+                bs.Disconnect();
+                IsConnected = false;
+            }
         }
 
         public async void SetPulseSequence()
@@ -80,28 +85,34 @@ namespace ArcReactor.Services
         public async Task<float> GetBatteryLevelAsync()
         {
             await bs.WriteAsync("batt");
-            await Task.Delay(2000);
-            var cts = new CancellationTokenSource(5000);
 
-            try
-            {
-                var result = await bs.ReadAsync(cts.Token);
+            return float.NaN;
+            
+            //var cts = new CancellationTokenSource(5000);
 
-                while (string.IsNullOrEmpty(result) || result.Length != 4)
-                {
-                    result = await bs.ReadAsync(cts.Token);
-                }
+            //try
+            //{
+            //    var result = await bs.ReadAsync(cts.Token);
 
-                return float.Parse(result);
-            }
-            catch (TaskCanceledException)
-            {
-                return float.NaN;
-            }
-            catch (ObjectDisposedException)
-            {
-                return float.NaN;
-            }
+            //    while (string.IsNullOrEmpty(result) || result.Length != 4)
+            //    {
+            //        result = await bs.ReadAsync(cts.Token);
+            //    }
+
+            //    return float.Parse(result);
+            //}
+            //catch (TaskCanceledException)
+            //{
+            //    return float.NaN;
+            //}
+            //catch (ObjectDisposedException)
+            //{
+            //    return float.NaN;
+            //}
+            //catch (COMException)
+            //{
+            //    return float.NaN;
+            //}
         }
     }
 }
