@@ -41,6 +41,9 @@ using Windows.Storage.Streams;
 // ########################################################################## //
 namespace ArcReactor.Services
 {
+    internal delegate void StringReceivedEventHandler(string value);
+    internal delegate void DisconnectedEventHandler();
+
     internal class BluetoothService
     {
         private DeviceInformationCollection devices;
@@ -48,6 +51,9 @@ namespace ArcReactor.Services
         private StreamSocket socket = null;
         private DataReader _btReader = null;
         private DataWriter _btWriter = null;
+
+        public event StringReceivedEventHandler StringReceived;
+        public event DisconnectedEventHandler Disconnected;
 
         // ------------------------------------------------------------------ //
         public BluetoothService() { }
@@ -79,13 +85,13 @@ namespace ArcReactor.Services
                 return false;
             }
 
-            IsConnected = true;
-            _btReader = new DataReader(socket.InputStream);
-            _btWriter = new DataWriter(socket.OutputStream);
-            _btReader.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
-            //_btWriter.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
+            IsConnected = true;            
 
-            _btReader.InputStreamOptions = InputStreamOptions.Partial;
+            DataReader btReader = new DataReader(socket.InputStream);
+            ReadIncomingDataAsync(btReader);
+
+            _btWriter = new DataWriter(socket.OutputStream);            
+            
             return true;
         }
 
@@ -122,56 +128,72 @@ namespace ArcReactor.Services
             }
         }
 
-        // ------------------------------------------------------------------ //
-        public async Task<String> ReadAsync(CancellationToken cancellationToken)
-        {
-            if (!IsConnected) { return null; }
-
-            Task<UInt32> loadAsyncTask;
-
-            uint ReadBufferLength = 10;
-
-            // If task cancellation was requested, comply
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // Set InputStreamOptions to complete the asynchronous read operation when one or more bytes is available
-            _btReader.InputStreamOptions = InputStreamOptions.Partial;
-
-            // Create a task object to wait for data on the serialPort.InputStream
-
-            if (cancellationToken.IsCancellationRequested)
-                return null;
-
-            loadAsyncTask = _btReader.LoadAsync(ReadBufferLength).AsTask(cancellationToken);
-
-            // Launch the task and wait
-            UInt32 bytesRead = await loadAsyncTask;
-            if (bytesRead > 0)
-            {
-                try
-                {
-                    string recvdtxt = _btReader.ReadString(bytesRead);
-                    return recvdtxt;
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("ReadAsync: " + ex.Message);
-                }
-
-            }
-
-            return null;
-
-        }
-
-        // ------------------------------------------------------------------ //
-        public async void Disconnect()
+        private async void ReadIncomingDataAsync(DataReader reader)
         {
             try
             {
-                await socket.CancelIOAsync();
-                socket.Dispose();
-                socket = null;
+                uint size = await reader.LoadAsync(sizeof(byte));
+                if (size < sizeof(byte))
+                {
+                    //Disconnect("Remote device terminated connection - make sure only one instance of server is running on remote device");
+                    return;
+                }
+
+                uint stringLength = reader.ReadByte();
+                uint actualStringLength = await reader.LoadAsync(stringLength);
+                if (actualStringLength != stringLength)
+                {
+                    // The underlying socket was closed before we were able to read the whole data
+                    return;
+                }
+                else
+                {
+                    var result = reader.ReadString(stringLength);
+                    StringReceived?.Invoke(result);
+                }
+
+                ReadIncomingDataAsync(reader);
+            }
+            catch (Exception ex)
+            {
+                lock (this)
+                {
+                    if (socket == null)
+                    {                        
+                        if ((uint)ex.HResult == 0x80072745)
+                        {
+                            Disconnect();
+                        }
+                        else if ((uint)ex.HResult == 0x800703E3)
+                        {
+                            // application exit requested
+                        }
+                    }
+                    else
+                    {
+                        
+                    }
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------ //
+        public void Disconnect()
+        {
+            try
+            {
+                if (_btWriter != null)
+                {
+                    _btWriter.DetachStream();
+                    _btWriter = null;
+                }
+
+
+                if (socket != null)
+                {
+                    socket.Dispose();
+                    socket = null;
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -179,6 +201,7 @@ namespace ArcReactor.Services
             finally
             {
                 IsConnected = false;
+                Disconnected?.Invoke();
             }
         }
 

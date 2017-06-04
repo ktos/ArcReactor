@@ -10,16 +10,41 @@ using System.Runtime.InteropServices;
 
 namespace ArcReactor.Services
 {
+    delegate void BatteryLevelChangedHandler(float value);    
+
     class ArcReactorService
     {
         private BluetoothService bs;
 
+        public event BatteryLevelChangedHandler BatteryLevelChanged;
+        public event DisconnectedEventHandler Disconnected;
+
         public ArcReactorService()
         {
             bs = new BluetoothService();
+            bs.StringReceived += Bs_OnStringReceived;
+            bs.Disconnected += Bs_Disconnected;
         }
 
-        public bool IsConnected { get; internal set; }
+        private void Bs_Disconnected()
+        {
+            IsConnected = bs.IsConnected;
+            Disconnected?.Invoke();
+        }
+
+        private void Bs_OnStringReceived(string value)
+        {
+            try
+            {
+                BatteryLevelChanged?.Invoke(float.Parse(value));
+            }
+            catch (FormatException)
+            {
+
+            }
+        }
+
+        public bool IsConnected { get; private set; }
 
         public async Task<bool> ConnectAsync(DeviceInformation selectedDevice)
         {
@@ -82,37 +107,9 @@ namespace ArcReactor.Services
             return pairedDevices;
         }
 
-        public async Task<float> GetBatteryLevelAsync()
+        public async void RequestBatteryLevel()
         {
-            await bs.WriteAsync("batt");
-
-            return float.NaN;
-            
-            //var cts = new CancellationTokenSource(5000);
-
-            //try
-            //{
-            //    var result = await bs.ReadAsync(cts.Token);
-
-            //    while (string.IsNullOrEmpty(result) || result.Length != 4)
-            //    {
-            //        result = await bs.ReadAsync(cts.Token);
-            //    }
-
-            //    return float.Parse(result);
-            //}
-            //catch (TaskCanceledException)
-            //{
-            //    return float.NaN;
-            //}
-            //catch (ObjectDisposedException)
-            //{
-            //    return float.NaN;
-            //}
-            //catch (COMException)
-            //{
-            //    return float.NaN;
-            //}
+            await bs.WriteAsync("batt");            
         }
     }
 }

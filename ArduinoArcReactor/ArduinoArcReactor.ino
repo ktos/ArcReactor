@@ -177,11 +177,16 @@ void battery()
 {
 	int bat[2];
 	bat[0] = analogRead(A0);
-	delay(100);
+	delay(1000);
 	bat[1] = analogRead(A0);
 	
 	float battery = ((bat[0] + bat[1]) / 2) / 1023.0 * AREF;	
-	Serial.print(battery);
+
+	delay(1000);
+
+	Serial.println(battery);
+
+	BTserial.print('\4');
 	BTserial.print(battery);
 
 	strcpy(buffer, "pulse");

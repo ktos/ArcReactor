@@ -45,7 +45,8 @@ namespace ArcReactor.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        private ArcReactorService bs;   
+        private ArcReactorService reactor;   
+
         public ObservableCollection<DeviceInformation> BluetoothSerialDevices { get; set; }
 
         public ObservableCollection<LedColor> LedColors { get; set; }
@@ -113,14 +114,14 @@ namespace ArcReactor.ViewModels
 
         public async Task Connect()
         {
-            if (bs.IsConnected)
+            if (reactor.IsConnected)
             {
-                bs.DisconnectAsync();
+                reactor.DisconnectAsync();
             }
             else
             {
                 Views.Busy.SetBusy(true, "Connecting...");
-                var result = await bs.ConnectAsync(SelectedDevice);
+                var result = await reactor.ConnectAsync(SelectedDevice);
                 Views.Busy.SetBusy(false);
                 if (!result)
                 {
@@ -131,7 +132,7 @@ namespace ArcReactor.ViewModels
                 }
             }
 
-            IsConnected = bs.IsConnected;
+            IsConnected = reactor.IsConnected;
         }
 
         public void CopyFirstLed()
@@ -142,9 +143,9 @@ namespace ArcReactor.ViewModels
             }
         }
 
-        public async void GetBatteryLevel()
+        public void GetBatteryLevel()
         {
-            BatteryLevel = await bs.GetBatteryLevelAsync();
+            reactor.RequestBatteryLevel();
         }        
 
         private async Task MessageBox(string text)
@@ -178,30 +179,43 @@ namespace ArcReactor.ViewModels
             if (Windows.ApplicationModel.DesignMode.DesignModeEnabled)
                 return;
 
-            bs = new ArcReactorService();
+            reactor = new ArcReactorService();
             RefreshDevicesList();
 
             CreateLedList();
+
+            reactor.BatteryLevelChanged += Reactor_BatteryLevelChanged;
+            reactor.Disconnected += Reactor_Disconnected;
+        }
+
+        private void Reactor_Disconnected()
+        {
+            IsConnected = reactor.IsConnected;
+        }
+
+        private void Reactor_BatteryLevelChanged(float value)
+        {
+            BatteryLevel = value;
         }
 
         public void SendPulse()
         {
-            bs.SetPulseSequence();
+            reactor.SetPulseSequence();
         }
 
         public void SendBlack()
         {
-            bs.SetAllBlack();
+            reactor.SetAllBlack();
         }
 
         public void SendStartup()
         {
-            bs.SetStartupSequence();
+            reactor.SetStartupSequence();
         }
 
         public void SendLeds()
         {
-            bs.SetLedsBatchAsync(LedColors);
+            reactor.SetLedsBatchAsync(LedColors);
         }
 
         private DelegateCommand<LedColor> _applyColorCommand;
@@ -213,7 +227,7 @@ namespace ArcReactor.ViewModels
 
         private void ApplyColorCommandExecute(LedColor param)
         {
-            bs.SetSingleLedAsync(param);
+            reactor.SetSingleLedAsync(param);
         }
 
         public void CreateLedList()
@@ -229,7 +243,7 @@ namespace ArcReactor.ViewModels
         {
             BluetoothSerialDevices = new ObservableCollection<DeviceInformation>();
 
-            var pairedDevices = await bs.FindPairedDevicesAsync();
+            var pairedDevices = await reactor.FindPairedDevicesAsync();
             foreach (var item in pairedDevices)
             {
                 BluetoothSerialDevices.Add(item);
