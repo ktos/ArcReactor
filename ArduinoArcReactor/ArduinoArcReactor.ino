@@ -48,6 +48,7 @@ uint32_t cyan_dim = strip.Color(CYAN_R / 8, CYAN_G / 8, CYAN_B / 8);
 uint32_t halfWhite = strip.Color(150, 255, 255);
 uint32_t white = strip.Color(255, 255, 255);
 
+char tmpbuff[100] = "";
 char buffer[100] = "startup";
 uint8_t bufflen = 7;
 
@@ -95,6 +96,7 @@ void corePulse()
 
 void ringPulse(int dim = 8)
 {
+	Serial.println("pulse start");
 	const uint32_t WAIT = 15;
 	int16_t count = 0;
 
@@ -111,6 +113,8 @@ void ringPulse(int dim = 8)
 			count++;
 		}
 	}
+
+	Serial.println("pulse end");
 }
 
 void startUp()
@@ -157,31 +161,21 @@ void battery()
 void setup()
 {
 	Serial.begin(9600);
-	BTserial.begin(9600);
+	BTserial.begin(38400);
 
 	pinMode(A0, INPUT);
 
 	strip.begin();
+
+	operationMode();
+
 	strip.show();
 }
 
-void loop()
+int index = 0;
+
+void operationMode()
 {
-	int avail = BTserial.available();
-	if (avail > 0)
-	{
-		int index = 0;
-		while (index < avail) {
-			buffer[index] = BTserial.read();
-			index++;
-		}
-		buffer[index] = 0;
-
-		bufflen = index - 1;
-
-		Serial.println(buffer);
-	}
-
 	if (strcmp(buffer, "startup") == 0)
 		startUp();
 
@@ -199,6 +193,27 @@ void loop()
 
 	if (buffer[0] == 'c')
 		individual();
+}
 
-	delay(150);
+void loop()
+{
+	if (BTserial.available() > 0)
+	{
+		tmpbuff[index] = BTserial.read();
+
+		if (tmpbuff[index] == '\n') {
+
+			tmpbuff[index] = 0;
+			Serial.println(tmpbuff);
+			index = 0;
+		
+			strcpy(buffer, tmpbuff);
+			operationMode();
+		}
+		else {
+			index++;
+		}
+	}
+
+	//operationMode();
 }

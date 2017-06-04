@@ -83,7 +83,7 @@ namespace ArcReactor.Services
             _btReader = new DataReader(socket.InputStream);
             _btWriter = new DataWriter(socket.OutputStream);
             _btReader.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
-            _btWriter.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
+            //_btWriter.UnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding.Utf8;
 
             _btReader.InputStreamOptions = InputStreamOptions.Partial;
             return true;
@@ -94,10 +94,11 @@ namespace ArcReactor.Services
         {
             if (!IsConnected) { return false; }
             try
-            {
+            {                
                 var n = _btWriter.WriteString(str);
+                _btWriter.WriteByte(10);                
                 await _btWriter.StoreAsync();
-                return n > 0;
+                return n > 0;                
             }
             catch (Exception ex)
             {
