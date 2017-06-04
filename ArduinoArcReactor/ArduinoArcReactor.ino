@@ -48,8 +48,8 @@ uint32_t cyan_dim = strip.Color(CYAN_R / 8, CYAN_G / 8, CYAN_B / 8);
 uint32_t halfWhite = strip.Color(150, 255, 255);
 uint32_t white = strip.Color(255, 255, 255);
 
-char tmpbuff[100] = "";
-char buffer[100] = "startup";
+char tmpbuff[120] = "";
+char buffer[120] = "startup";
 uint8_t bufflen = 7;
 
 const float AREF = 5.0;
@@ -125,12 +125,22 @@ void startUp()
 	core(black);
 }
 
-void everyindividual()
-{
-	int ledindex = 0;
+void batch()
+{	
+	uint16_t ledindex = 0;
 	int index = 1;
+
 	while (ledindex < LEDS) {
-		strip.setPixelColor(ledindex, strip.Color(buffer[index], buffer[index + 1], buffer[index + 2]));
+		Serial.print("LED ");
+		Serial.print(ledindex);
+		Serial.print(" set to ");
+		Serial.print((uint8_t)buffer[index]);
+		Serial.print(',');
+		Serial.print((uint8_t)buffer[index + 1]);
+		Serial.print(',');
+		Serial.println((uint8_t)buffer[index + 2]);
+
+		strip.setPixelColor(ledindex, strip.Color((uint8_t)buffer[index], (uint8_t)buffer[index + 1], (uint8_t)buffer[index + 2]));
 		index += 3;
 		ledindex++;
 	}
@@ -171,6 +181,7 @@ void battery()
 	bat[1] = analogRead(A0);
 	
 	float battery = ((bat[0] + bat[1]) / 2) / 1023.0 * AREF;	
+	Serial.print(battery);
 	BTserial.print(battery);
 
 	strcpy(buffer, "pulse");
@@ -207,7 +218,7 @@ void operationMode()
 		battery();
 
 	if (buffer[0] == 'i')
-		everyindividual();
+		batch();
 
 	if (buffer[0] == 'c')
 		individual();
@@ -228,7 +239,7 @@ void loop()
 			Serial.println(tmpbuff);
 			index = 0;
 		
-			memcpy(buffer, tmpbuff, 100);
+			memcpy(buffer, tmpbuff, 120);
 			operationMode();
 		}
 		else {

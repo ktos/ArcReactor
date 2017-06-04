@@ -186,17 +186,17 @@ namespace ArcReactor.ViewModels
 
         public async void SendLeds()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("i");
+            byte[] sb = new byte[LED_COUNTER * 3 + 1];
+            sb[0] = (byte)'i';
 
             for (int i = 0; i < LED_COUNTER; i++)
             {
-                sb.Append((char)LedColors[i].R);
-                sb.Append((char)LedColors[i].G);
-                sb.Append((char)LedColors[i].B);
+                sb[i * 3 + 1] = (byte)LedColors[i].R;
+                sb[i * 3 + 2] = (byte)LedColors[i].G;
+                sb[i * 3 + 3] = (byte)LedColors[i].B;
             }
 
-            await bs.WriteAsync(sb.ToString());
+            await bs.WriteBytesAsync(sb);
         }
 
         private async Task MessageBox(string text)
