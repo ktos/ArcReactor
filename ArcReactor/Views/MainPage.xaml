@@ -48,7 +48,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch" ItemsSource="{Binding BluetoothSerialDevices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}" Grid.Row="0">
+            <ComboBox x:Name="cbDevices" HorizontalAlignment="Stretch" ItemsSource="{Binding ArcReactorDevices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}" Grid.Row="0">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" />
@@ -83,7 +83,7 @@
                     </StackPanel>
                     
                     <ScrollViewer IsVerticalRailEnabled="True" Grid.Row="1">
-                        <ListView ItemsSource="{Binding LedColors}">
+                        <ListView ItemsSource="{Binding RgbLeds}">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,0,0,10">

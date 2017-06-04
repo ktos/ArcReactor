@@ -4,8 +4,8 @@
 
     <vm:MainPageViewModel.ConnectButtonDescription>Connect</vm:MainPageViewModel.ConnectButtonDescription>
     <vm:MainPageViewModel.IsConnected>True</vm:MainPageViewModel.IsConnected>
-    <vm:MainPageViewModel.LedColors>
-        
-    </vm:MainPageViewModel.LedColors>
+    <vm:MainPageViewModel.RgbLeds>
+        <m:ColoredLed R="127" G="0" B="0" />
+    </vm:MainPageViewModel.RgbLeds>
     
 </vm:MainPageViewModel>
