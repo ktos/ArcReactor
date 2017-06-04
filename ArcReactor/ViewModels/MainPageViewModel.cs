@@ -45,7 +45,7 @@ namespace ArcReactor.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        private BluetoothService bs;
+        private ArcReactorService bs;   
         public ObservableCollection<DeviceInformation> BluetoothSerialDevices { get; set; }
 
         public ObservableCollection<LedColor> LedColors { get; set; }
@@ -115,7 +115,7 @@ namespace ArcReactor.ViewModels
         {
             if (bs.IsConnected)
             {
-                bs.Disconnect();
+                bs.DisconnectAsync();
             }
             else
             {
@@ -144,60 +144,8 @@ namespace ArcReactor.ViewModels
 
         public async void GetBatteryLevel()
         {
-            await bs.WriteAsync("batt");
-            await Task.Delay(2000);
-            var cts = new CancellationTokenSource(5000);
-
-            try
-            {
-                var result = await bs.ReadAsync(cts.Token);
-
-                while (string.IsNullOrEmpty(result) || result.Length != 4)
-                {
-                    result = await bs.ReadAsync(cts.Token);
-                }
-
-                BatteryLevel = float.Parse(result);
-            }
-            catch (TaskCanceledException)
-            {
-                BatteryLevel = float.NaN;
-            }
-            catch (ObjectDisposedException)
-            {
-                Connect();
-            }
-        }
-
-        public async void SendPulse()
-        {
-            await bs.WriteAsync("pulse");
-        }
-
-        public async void SendStartup()
-        {
-            await bs.WriteAsync("startup");
-        }
-
-        public async void SendBlack()
-        {
-            await bs.WriteAsync("black");
-        }
-
-        public async void SendLeds()
-        {
-            byte[] sb = new byte[LED_COUNTER * 3 + 1];
-            sb[0] = (byte)'i';
-
-            for (int i = 0; i < LED_COUNTER; i++)
-            {
-                sb[i * 3 + 1] = (byte)LedColors[i].R;
-                sb[i * 3 + 2] = (byte)LedColors[i].G;
-                sb[i * 3 + 3] = (byte)LedColors[i].B;
-            }
-
-            await bs.WriteBytesAsync(sb);
-        }
+            BatteryLevel = await bs.GetBatteryLevelAsync();
+        }        
 
         private async Task MessageBox(string text)
         {
@@ -230,10 +178,30 @@ namespace ArcReactor.ViewModels
             if (Windows.ApplicationModel.DesignMode.DesignModeEnabled)
                 return;
 
-            bs = new BluetoothService();
+            bs = new ArcReactorService();
             RefreshDevicesList();
 
             CreateLedList();
+        }
+
+        public void SendPulse()
+        {
+            bs.SetPulseSequence();
+        }
+
+        public void SendBlack()
+        {
+            bs.SetAllBlack();
+        }
+
+        public void SendStartup()
+        {
+            bs.SetStartupSequence();
+        }
+
+        public void SendLeds()
+        {
+            bs.SetLedsBatchAsync(LedColors);
         }
 
         private DelegateCommand<LedColor> _applyColorCommand;
@@ -243,9 +211,9 @@ namespace ArcReactor.ViewModels
 
         private bool ApplyColorCommandCanExecute(LedColor param) => true;
 
-        private async void ApplyColorCommandExecute(LedColor param)
+        private void ApplyColorCommandExecute(LedColor param)
         {
-            await bs.WriteBytesAsync(param.ToDeviceCommand());
+            bs.SetSingleLedAsync(param);
         }
 
         public void CreateLedList()

@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="Models\LedColor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ArcReactorService.cs" />
     <Compile Include="Services\BluetoothService.cs" />
     <Compile Include="ViewModels\AboutPageViewModel.cs" />
     <Compile Include="ViewModels\MainPageViewModel.cs" />
