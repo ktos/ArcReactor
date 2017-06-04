@@ -29,22 +29,27 @@
 
 #endregion License
 
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.UI;
 
 namespace ArcReactor.Models
 {
-    public class LedColor : INotifyPropertyChanged
+    /// <summary>
+    /// Represents a single RGB led on Arc Reactor device
+    /// </summary>
+    public class ColoredLed : INotifyPropertyChanged
     {
+        /// <summary>
+        /// Index of the LED, starting from 0, where 0 is a central
+        /// ("core") and the next are either "core" or "ring"
+        /// </summary>
         public int Index { get; set; }
 
         private Color color;
 
+        /// <summary>
+        /// The color of the LED
+        /// </summary>
         public Color Color
         {
             get
@@ -62,9 +67,11 @@ namespace ArcReactor.Models
             }
         }
 
-
         private int r;
 
+        /// <summary>
+        /// Intensity value for red color
+        /// </summary>
         public int R
         {
             get
@@ -86,6 +93,9 @@ namespace ArcReactor.Models
 
         private int g;
 
+        /// <summary>
+        /// Intensity value for green color
+        /// </summary>
         public int G
         {
             get
@@ -107,6 +117,9 @@ namespace ArcReactor.Models
 
         private int b;
 
+        /// <summary>
+        /// Intensity value for blue color
+        /// </summary>
         public int B
         {
             get
@@ -126,6 +139,12 @@ namespace ArcReactor.Models
             }
         }
 
+        /// <summary>
+        /// Sets the value for red, green and blue properties all in one
+        /// </summary>
+        /// <param name="r">New value for red</param>
+        /// <param name="g">New value for green</param>
+        /// <param name="b">New value for blue</param>
         public void SetRgb(int r, int g, int b)
         {
             R = r;
@@ -133,6 +152,11 @@ namespace ArcReactor.Models
             B = b;
         }
 
+        /// <summary>
+        /// Converts the current LED data into a Arc Reactor device
+        /// command for setting the desired LED
+        /// </summary>
+        /// <returns>Device command to be sent to Arc Reactor device</returns>
         public byte[] ToDeviceCommand()
         {
             byte[] sb = new byte[5];
@@ -147,24 +171,21 @@ namespace ArcReactor.Models
             return sb;
         }
 
-
         /// <summary>
         /// Even run when databound property is changed
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Handles when property is changed raising <see cref="PropertyChanged"/>
-        /// event.
-        /// 
+        /// Handles when property is changed raising <see
+        /// cref="PropertyChanged"/> event.
+        ///
         /// Part of <see cref="INotifyPropertyChanged"/> implementation.
         /// </summary>
         /// <param name="name">Name of a changed property</param>
         protected void OnPropertyChanged(string name)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(name));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
     }
 }

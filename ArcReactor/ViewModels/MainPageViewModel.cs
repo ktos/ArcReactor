@@ -32,10 +32,7 @@
 using ArcReactor.Models;
 using ArcReactor.Services;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Template10.Mvvm;
 using Windows.Devices.Enumeration;
@@ -43,16 +40,28 @@ using Windows.UI.Popups;
 
 namespace ArcReactor.ViewModels
 {
+    /// <summary>
+    /// ViewModel for the MainPage
+    /// </summary>
     public class MainPageViewModel : ViewModelBase
     {
-        private ArcReactorService reactor;   
+        private ArcReactorService reactor;
 
-        public ObservableCollection<DeviceInformation> BluetoothSerialDevices { get; set; }
+        /// <summary>
+        /// The collection of Arc Reactor devices to connect with
+        /// </summary>
+        public ObservableCollection<DeviceInformation> ArcReactorDevices { get; set; }
 
-        public ObservableCollection<LedColor> LedColors { get; set; }
+        /// <summary>
+        /// The collection of RGB LEDs available at the Arc Reactor device
+        /// </summary>
+        public ObservableCollection<ColoredLed> RgbLeds { get; set; }
 
         private DeviceInformation selectedDevice;
 
+        /// <summary>
+        /// Selected device to connect to
+        /// </summary>
         public DeviceInformation SelectedDevice
         {
             get
@@ -70,9 +79,11 @@ namespace ArcReactor.ViewModels
             }
         }
 
-
         private float batteryLevel;
 
+        /// <summary>
+        /// Battery level of the connected device
+        /// </summary>
         public float BatteryLevel
         {
             get
@@ -90,9 +101,11 @@ namespace ArcReactor.ViewModels
             }
         }
 
-
         private bool isConnected;
 
+        /// <summary>
+        /// Is the device connected or not
+        /// </summary>
         public bool IsConnected
         {
             get
@@ -112,11 +125,14 @@ namespace ArcReactor.ViewModels
             }
         }
 
-        public async Task Connect()
+        /// <summary>
+        /// Connects with a selected device
+        /// </summary>
+        public async void Connect()
         {
             if (reactor.IsConnected)
             {
-                reactor.DisconnectAsync();
+                reactor.Disconnect();
             }
             else
             {
@@ -135,18 +151,24 @@ namespace ArcReactor.ViewModels
             IsConnected = reactor.IsConnected;
         }
 
+        /// <summary>
+        /// Copy color from the first LED to every another
+        /// </summary>
         public void CopyFirstLed()
         {
             for (int i = 1; i < LED_COUNTER; i++)
             {
-                LedColors[i].SetRgb(LedColors[0].R, LedColors[0].G, LedColors[0].B);
+                RgbLeds[i].SetRgb(RgbLeds[0].R, RgbLeds[0].G, RgbLeds[0].B);
             }
         }
 
+        /// <summary>
+        /// Asks the device about the battery level
+        /// </summary>
         public void GetBatteryLevel()
         {
             reactor.RequestBatteryLevel();
-        }        
+        }
 
         private async Task MessageBox(string text)
         {
@@ -157,6 +179,9 @@ namespace ArcReactor.ViewModels
         private string connectButtonDescription = "Connect";
         private const int LED_COUNTER = 25;
 
+        /// <summary>
+        /// Description of the connect/disconnect button
+        /// </summary>
         public string ConnectButtonDescription
         {
             get
@@ -174,6 +199,10 @@ namespace ArcReactor.ViewModels
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of MainPageViewModel, and starts
+        /// searching for Arc Reactor devices
+        /// </summary>
         public MainPageViewModel()
         {
             if (Windows.ApplicationModel.DesignMode.DesignModeEnabled)
@@ -198,58 +227,80 @@ namespace ArcReactor.ViewModels
             BatteryLevel = value;
         }
 
+        /// <summary>
+        /// Changes device mode to pulsing
+        /// </summary>
         public void SendPulse()
         {
             reactor.SetPulseSequence();
         }
 
+        /// <summary>
+        /// Turns off all device LEDs
+        /// </summary>
         public void SendBlack()
         {
             reactor.SetAllBlack();
         }
 
+        /// <summary>
+        /// Turns on "startup" mode for device
+        /// </summary>
         public void SendStartup()
         {
             reactor.SetStartupSequence();
         }
 
+        /// <summary>
+        /// Sends to the device desired LEDs color for every diode
+        /// </summary>
         public void SendLeds()
         {
-            reactor.SetLedsBatchAsync(LedColors);
+            reactor.SetLedsBatchAsync(RgbLeds);
         }
 
-        private DelegateCommand<LedColor> _applyColorCommand;
+        private DelegateCommand<ColoredLed> _applyColorCommand;
 
-        public DelegateCommand<LedColor> ApplyColorCommand
-            => _applyColorCommand ?? (_applyColorCommand = new DelegateCommand<LedColor>(ApplyColorCommandExecute, ApplyColorCommandCanExecute));
+        /// <summary>
+        /// Sends to the device desired LED color for a single diode
+        /// </summary>
+        public DelegateCommand<ColoredLed> ApplyColor
+            => _applyColorCommand ?? (_applyColorCommand = new DelegateCommand<ColoredLed>(ApplyColorCommandExecute, ApplyColorCommandCanExecute));
 
-        private bool ApplyColorCommandCanExecute(LedColor param) => true;
+        private bool ApplyColorCommandCanExecute(ColoredLed param) => true;
 
-        private void ApplyColorCommandExecute(LedColor param)
+        private void ApplyColorCommandExecute(ColoredLed param)
         {
             reactor.SetSingleLedAsync(param);
         }
 
-        public void CreateLedList()
+        private void CreateLedList()
         {
-            LedColors = new ObservableCollection<LedColor>();
+            RgbLeds = new ObservableCollection<ColoredLed>();
             for (int i = 0; i < LED_COUNTER; i++)
             {
-                LedColors.Add(new LedColor { Index = i, R = 0, G = 0, B = 0 });
+                RgbLeds.Add(new ColoredLed { Index = i, R = 0, G = 0, B = 0 });
             }
         }
 
-        public async Task RefreshDevicesList()
+        /// <summary>
+        /// Refreshes the list of devices available for connection
+        /// </summary>
+        /// <returns></returns>
+        public async void RefreshDevicesList()
         {
-            BluetoothSerialDevices = new ObservableCollection<DeviceInformation>();
+            ArcReactorDevices = new ObservableCollection<DeviceInformation>();
 
             var pairedDevices = await reactor.FindPairedDevicesAsync();
             foreach (var item in pairedDevices)
             {
-                BluetoothSerialDevices.Add(item);
+                ArcReactorDevices.Add(item);
             }
         }
 
+        /// <summary>
+        /// Navigates to About page
+        /// </summary>
         public void GotoAbout() =>
             NavigationService.Navigate(typeof(Views.AboutPage));
     }

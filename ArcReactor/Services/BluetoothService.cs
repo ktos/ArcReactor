@@ -30,35 +30,57 @@
 #endregion License
 
 using System;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth.Rfcomm;
 using Windows.Devices.Enumeration;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
-// ########################################################################## //
 namespace ArcReactor.Services
 {
-    internal delegate void StringReceivedEventHandler(string value);
-    internal delegate void DisconnectedEventHandler();
+    /// <summary>
+    /// Handles the event when new string data was sent by Bluetooth device
+    /// </summary>
+    /// <param name="value">Value received from the device</param>
+    public delegate void StringReceivedEventHandler(string value);
 
-    internal class BluetoothService
+    /// <summary>
+    /// Handles the situation when the device was disconnected
+    /// </summary>
+    public delegate void DisconnectedEventHandler();
+
+    /// <summary>
+    /// Class for communication with Serial Bluetooth Devices (SPP profile)
+    /// </summary>
+    public class BluetoothService
     {
         private DeviceInformationCollection devices;
         public bool IsConnected { get; set; } = false;
         private StreamSocket socket = null;
-        private DataReader _btReader = null;
         private DataWriter _btWriter = null;
 
+        /// <summary>
+        /// Connected device sent new string
+        /// </summary>
         public event StringReceivedEventHandler StringReceived;
+
+        /// <summary>
+        /// The device was disconnected
+        /// </summary>
         public event DisconnectedEventHandler Disconnected;
 
-        // ------------------------------------------------------------------ //
-        public BluetoothService() { }
+        /// <summary>
+        /// Initializes a new instance of Bluetooth Service
+        /// </summary>
+        public BluetoothService()
+        {
 
-        // ------------------------------------------------------------------ //
+        }
+
+        /// <summary>
+        /// Searches for every paired device supporting the SPP profile and returns the collection of information about such devices
+        /// </summary>
+        /// <returns>A collection of device information for every device supporting SPP</returns>
         public async Task<DeviceInformationCollection> FindPairedDevicesAsync()
         {
             var aqsDevices = RfcommDeviceService.GetDeviceSelector(RfcommServiceId.SerialPort);
@@ -66,7 +88,11 @@ namespace ArcReactor.Services
             return this.devices;
         }
 
-        // ------------------------------------------------------------------ //
+        /// <summary>
+        /// Connects with a desired SPP device
+        /// </summary>
+        /// <param name="device">A device to connect with</param>
+        /// <returns>Returns if operation was successful</returns>
         public async Task<bool> ConnectAsync(DeviceInformation device)
         {
             var service = await RfcommDeviceService.FromIdAsync(device.Id);
@@ -85,26 +111,30 @@ namespace ArcReactor.Services
                 return false;
             }
 
-            IsConnected = true;            
+            IsConnected = true;
 
             DataReader btReader = new DataReader(socket.InputStream);
             ReadIncomingDataAsync(btReader);
 
-            _btWriter = new DataWriter(socket.OutputStream);            
-            
+            _btWriter = new DataWriter(socket.OutputStream);
+
             return true;
         }
 
-        // ------------------------------------------------------------------ //
+        /// <summary>
+        /// Sends a string value ended with \n to the device. The \n is added automatically.
+        /// </summary>
+        /// <param name="str">Value to be sent to the device</param>
+        /// <returns>Returns if operation was successful</returns>
         public async Task<bool> WriteAsync(string str)
         {
             if (!IsConnected) { return false; }
             try
-            {                
+            {
                 var n = _btWriter.WriteString(str);
-                _btWriter.WriteByte(10);                
+                _btWriter.WriteByte(10);
                 await _btWriter.StoreAsync();
-                return n > 0;                
+                return n > 0;
             }
             catch (Exception ex)
             {
@@ -112,6 +142,11 @@ namespace ArcReactor.Services
             }
         }
 
+        /// <summary>
+        /// Sends a stream of bytes to the device, ending with \n. The \n is added automatically.
+        /// </summary>
+        /// <param name="data">Data to be sent to the device</param>
+        /// <returns>Returns if the operation was successful</returns>
         public async Task<bool> WriteBytesAsync(byte[] data)
         {
             if (!IsConnected) { return false; }
@@ -135,7 +170,7 @@ namespace ArcReactor.Services
                 uint size = await reader.LoadAsync(sizeof(byte));
                 if (size < sizeof(byte))
                 {
-                    //Disconnect("Remote device terminated connection - make sure only one instance of server is running on remote device");
+                    // remote device terminated conetion
                     return;
                 }
 
@@ -143,7 +178,8 @@ namespace ArcReactor.Services
                 uint actualStringLength = await reader.LoadAsync(stringLength);
                 if (actualStringLength != stringLength)
                 {
-                    // The underlying socket was closed before we were able to read the whole data
+                    // the underlying socket was closed before we were
+                    // able to read the whole data
                     return;
                 }
                 else
@@ -159,7 +195,7 @@ namespace ArcReactor.Services
                 lock (this)
                 {
                     if (socket == null)
-                    {                        
+                    {
                         if ((uint)ex.HResult == 0x80072745)
                         {
                             Disconnect();
@@ -171,13 +207,14 @@ namespace ArcReactor.Services
                     }
                     else
                     {
-                        
                     }
                 }
             }
         }
 
-        // ------------------------------------------------------------------ //
+        /// <summary>
+        /// Disconnects from the Bluetooth device
+        /// </summary>
         public void Disconnect()
         {
             try
@@ -187,7 +224,6 @@ namespace ArcReactor.Services
                     _btWriter.DetachStream();
                     _btWriter = null;
                 }
-
 
                 if (socket != null)
                 {
@@ -204,7 +240,5 @@ namespace ArcReactor.Services
                 Disconnected?.Invoke();
             }
         }
-
-        // ------------------------------------------------------------------ //
     }
 }
