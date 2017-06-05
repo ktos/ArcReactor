@@ -54,6 +54,9 @@ uint8_t bufflen = 7;
 
 const float AREF = 5.2;
 
+const int dim = 8;
+ColorPulser pulser(Color(CYAN_R / dim, CYAN_G / dim, CYAN_B / dim), Color(255 / dim, 255 / dim, 255 / dim));
+
 void core(uint32_t color)
 {
 	strip.setPixelColor(CORE_LED, color);
@@ -74,44 +77,20 @@ void ring(uint32_t color, uint32_t wait = 0)
 	strip.show();
 }
 
-void corePulse()
+int count = 0;
+
+void pulse()
 {
-	const uint32_t WAIT = 15;
-	int16_t count = 0;
-
-	ring(cyan);
-
-	ColorPulser pulser(Color(CYAN_R, CYAN_G, CYAN_B), Color(255, 255, 255));
-	while (count < 10)
+	auto& c = pulser.Value();
+	core(strip.Color(c.R, c.G, c.B));
+	ring(strip.Color(c.R, c.G, c.B));
+	delay(15);
+	if (!pulser.Animate())
 	{
-		auto& c = pulser.Value();
-		core(strip.Color(c.R, c.G, c.B));
-		delay(WAIT);
-		if (!pulser.Animate())
-		{
-			count++;
-		}
+		count++;
 	}
-}
 
-void ringPulse(int dim = 8)
-{	
-	const uint32_t WAIT = 15;
-	int16_t count = 0;
-
-	core(cyan_dim);
-
-	ColorPulser pulser(Color(CYAN_R / dim, CYAN_G / dim, CYAN_B / dim), Color(255 / dim, 255 / dim, 255 / dim));
-	while (count < 10)
-	{
-		auto& c = pulser.Value();
-		ring(strip.Color(c.R, c.G, c.B));
-		delay(WAIT);
-		if (!pulser.Animate())
-		{
-			count++;
-		}
-	}
+	if (count == 10) count = 0;
 }
 
 void startUp()
@@ -125,8 +104,13 @@ void startUp()
 	core(black);
 }
 
+void nop()
+{
+	delay(100);
+}
+
 void batch()
-{	
+{
 	uint16_t ledindex = 0;
 	int index = 1;
 
@@ -146,6 +130,8 @@ void batch()
 	}
 
 	strip.show();
+
+	strcpy(buffer, "nop");
 }
 
 void individual()
@@ -161,6 +147,8 @@ void individual()
 
 	strip.setPixelColor((uint16_t)buffer[1], strip.Color((uint8_t)buffer[2], (uint8_t)buffer[3], (uint8_t)buffer[4]));
 	strip.show();
+
+	strcpy(buffer, "nop");
 }
 
 void setring()
@@ -179,8 +167,8 @@ void battery()
 	bat[0] = analogRead(A0);
 	delay(1000);
 	bat[1] = analogRead(A0);
-	
-	float battery = ((bat[0] + bat[1]) / 2) / 1023.0 * AREF;	
+
+	float battery = ((bat[0] + bat[1]) / 2) / 1023.0 * AREF;
 
 	delay(1000);
 
@@ -214,13 +202,19 @@ void operationMode()
 		startUp();
 
 	if (strcmp(buffer, "pulse") == 0)
-		ringPulse();
+		pulse();
 
-	if (strcmp(buffer, "black") == 0)
+	if (strcmp(buffer, "black") == 0) {
+		core(black);
 		ring(black);
+		strcpy(buffer, "nop");
+	}
 
 	if (strcmp(buffer, "batt") == 0)
 		battery();
+
+	if (strcmp(buffer, "nop") == 0)
+		nop();
 
 	if (buffer[0] == 'i')
 		batch();
@@ -243,12 +237,14 @@ void loop()
 			tmpbuff[index] = 0;
 			Serial.println(tmpbuff);
 			index = 0;
-		
+
 			memcpy(buffer, tmpbuff, 120);
-			operationMode();
 		}
 		else {
 			index++;
 		}
-	}	
+	}
+	else {
+		operationMode();
+	}
 }
