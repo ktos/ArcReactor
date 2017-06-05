@@ -104,11 +104,6 @@ void startUp()
 	core(black);
 }
 
-void nop()
-{
-	delay(100);
-}
-
 void batch()
 {
 	uint16_t ledindex = 0;
@@ -214,7 +209,7 @@ void operationMode()
 		battery();
 
 	if (strcmp(buffer, "nop") == 0)
-		nop();
+		return;
 
 	if (buffer[0] == 'i')
 		batch();
