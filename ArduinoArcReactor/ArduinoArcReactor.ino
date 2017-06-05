@@ -250,7 +250,5 @@ void loop()
 		else {
 			index++;
 		}
-	}
-
-	//operationMode();
+	}	
 }
