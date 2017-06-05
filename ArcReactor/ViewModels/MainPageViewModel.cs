@@ -138,6 +138,7 @@ namespace ArcReactor.ViewModels
             {
                 Views.Busy.SetBusy(true, "Connecting...");
                 var result = await reactor.ConnectAsync(SelectedDevice);
+                reactor.RequestBatteryLevel();
                 Views.Busy.SetBusy(false);
                 if (!result)
                 {

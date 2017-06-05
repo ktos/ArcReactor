@@ -4,6 +4,7 @@
 
     <vm:MainPageViewModel.ConnectButtonDescription>Connect</vm:MainPageViewModel.ConnectButtonDescription>
     <vm:MainPageViewModel.IsConnected>True</vm:MainPageViewModel.IsConnected>
+    <vm:MainPageViewModel.BatteryLevel>3.5</vm:MainPageViewModel.BatteryLevel>
     <vm:MainPageViewModel.RgbLeds>
         <m:ColoredLed R="127" G="0" B="0" />
     </vm:MainPageViewModel.RgbLeds>
