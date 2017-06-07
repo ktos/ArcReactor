@@ -45,6 +45,8 @@ namespace ArcReactor.ViewModels
     /// </summary>
     public class MainPageViewModel : ViewModelBase
     {
+        private const int LEDCOUNTER = 25;
+
         private ArcReactorService reactor;
 
         /// <summary>
@@ -118,7 +120,7 @@ namespace ArcReactor.ViewModels
                 if (this.isConnected != value)
                 {
                     isConnected = value;
-                    ConnectButtonDescription = (isConnected) ? "Disconnect" : "Connect";
+                    ConnectButtonDescription = isConnected ? "Disconnect" : "Connect";
 
                     RaisePropertyChanged(nameof(IsConnected));
                 }
@@ -157,7 +159,7 @@ namespace ArcReactor.ViewModels
         /// </summary>
         public void CopyFirstLed()
         {
-            for (int i = 1; i < LED_COUNTER; i++)
+            for (int i = 1; i < LEDCOUNTER; i++)
             {
                 RgbLeds[i].SetRgb(RgbLeds[0].R, RgbLeds[0].G, RgbLeds[0].B);
             }
@@ -178,7 +180,6 @@ namespace ArcReactor.ViewModels
         }
 
         private string connectButtonDescription = "Connect";
-        private const int LED_COUNTER = 25;
 
         /// <summary>
         /// Description of the connect/disconnect button
@@ -278,7 +279,7 @@ namespace ArcReactor.ViewModels
         private void CreateLedList()
         {
             RgbLeds = new ObservableCollection<ColoredLed>();
-            for (int i = 0; i < LED_COUNTER; i++)
+            for (int i = 0; i < LEDCOUNTER; i++)
             {
                 RgbLeds.Add(new ColoredLed { Index = i, R = 0, G = 0, B = 0 });
             }
@@ -287,7 +288,6 @@ namespace ArcReactor.ViewModels
         /// <summary>
         /// Refreshes the list of devices available for connection
         /// </summary>
-        /// <returns></returns>
         public async void RefreshDevicesList()
         {
             ArcReactorDevices = new ObservableCollection<DeviceInformation>();

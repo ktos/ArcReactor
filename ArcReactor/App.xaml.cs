@@ -35,17 +35,27 @@ using Windows.UI.Xaml.Data;
 
 namespace ArcReactor
 {
-    /// Documentation on APIs used in this page: https://github.com/Windows-XAML/Template10/wiki
-
+    /// <summary>
+    /// Application entry point
+    /// </summary>
     [Bindable]
     sealed partial class App : Template10.Common.BootStrapper
     {
+        /// <summary>
+        /// Initializes a new instance of App and requests "light" theme
+        /// </summary>
         public App()
         {
             InitializeComponent();
             RequestedTheme = Windows.UI.Xaml.ApplicationTheme.Light;
         }
 
+        /// <summary>
+        /// Navigates to the first view od the page on the application startup
+        /// </summary>
+        /// <param name="startKind">Type of startup</param>
+        /// <param name="args">Additional parameters</param>
+        /// <returns>Awaitable navigation object</returns>
         public override async Task OnStartAsync(StartKind startKind, IActivatedEventArgs args)
         {
             await NavigationService.NavigateAsync(typeof(Views.MainPage));

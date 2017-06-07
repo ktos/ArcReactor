@@ -33,8 +33,14 @@ using Windows.UI.Xaml.Controls;
 
 namespace ArcReactor.Views
 {
+    /// <summary>
+    /// The MainPage, showing the main screen of the application
+    /// </summary>
     public sealed partial class MainPage : Page
     {
+        /// <summary>
+        /// Initializes a new instance of MainPage
+        /// </summary>
         public MainPage()
         {
             InitializeComponent();

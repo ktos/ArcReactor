@@ -55,9 +55,14 @@ namespace ArcReactor.Services
     public class BluetoothService
     {
         private DeviceInformationCollection devices;
+
+        /// <summary>
+        /// Describes if the connection with the device is currently active
+        /// </summary>
         public bool IsConnected { get; set; } = false;
+
         private StreamSocket socket = null;
-        private DataWriter _btWriter = null;
+        private DataWriter dataWriter = null;
 
         /// <summary>
         /// Connected device sent new string
@@ -74,7 +79,6 @@ namespace ArcReactor.Services
         /// </summary>
         public BluetoothService()
         {
-
         }
 
         /// <summary>
@@ -106,17 +110,17 @@ namespace ArcReactor.Services
             {
                 await socket.ConnectAsync(service.ConnectionHostName, service.ConnectionServiceName, SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
 
             IsConnected = true;
 
-            DataReader btReader = new DataReader(socket.InputStream);
-            ReadIncomingDataAsync(btReader);
+            DataReader dataReader = new DataReader(socket.InputStream);
+            ReadIncomingDataAsync(dataReader);
 
-            _btWriter = new DataWriter(socket.OutputStream);
+            dataWriter = new DataWriter(socket.OutputStream);
 
             return true;
         }
@@ -128,15 +132,17 @@ namespace ArcReactor.Services
         /// <returns>Returns if operation was successful</returns>
         public async Task<bool> WriteAsync(string str)
         {
-            if (!IsConnected) { return false; }
+            if (!IsConnected)
+                return false;
+
             try
             {
-                var n = _btWriter.WriteString(str);
-                _btWriter.WriteByte(10);
-                await _btWriter.StoreAsync();
+                var n = dataWriter.WriteString(str);
+                dataWriter.WriteByte(10);
+                await dataWriter.StoreAsync();
                 return n > 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -149,15 +155,17 @@ namespace ArcReactor.Services
         /// <returns>Returns if the operation was successful</returns>
         public async Task<bool> WriteBytesAsync(byte[] data)
         {
-            if (!IsConnected) { return false; }
+            if (!IsConnected)
+                return false;
+
             try
             {
-                _btWriter.WriteBytes(data);
-                _btWriter.WriteByte(10);
-                await _btWriter.StoreAsync();
+                dataWriter.WriteBytes(data);
+                dataWriter.WriteByte(10);
+                await dataWriter.StoreAsync();
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
@@ -219,10 +227,10 @@ namespace ArcReactor.Services
         {
             try
             {
-                if (_btWriter != null)
+                if (dataWriter != null)
                 {
-                    _btWriter.DetachStream();
-                    _btWriter = null;
+                    dataWriter.DetachStream();
+                    dataWriter = null;
                 }
 
                 if (socket != null)

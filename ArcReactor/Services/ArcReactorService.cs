@@ -42,7 +42,7 @@ namespace ArcReactor.Services
     /// Handles a situation when battery level message from ArcReactor
     /// was received
     /// </summary>
-    /// <param name="value"></param>
+    /// <param name="value">New battery level</param>
     public delegate void BatteryLevelChangedHandler(float value);
 
     /// <summary>
@@ -159,14 +159,14 @@ namespace ArcReactor.Services
         /// </param>
         public async void SetLedsBatchAsync(IList<ColoredLed> leds)
         {
-            byte[] sb = new byte[leds.Count * 3 + 1];
+            byte[] sb = new byte[(leds.Count * 3) + 1];
             sb[0] = (byte)'i';
 
             for (int i = 0; i < leds.Count; i++)
             {
-                sb[i * 3 + 1] = (byte)leds[i].R;
-                sb[i * 3 + 2] = (byte)leds[i].G;
-                sb[i * 3 + 3] = (byte)leds[i].B;
+                sb[(i * 3) + 2] = (byte)leds[i].G;
+                sb[(i * 3) + 3] = (byte)leds[i].B;
+                sb[(i * 3) + 1] = (byte)leds[i].R;
             }
 
             await bs.WriteBytesAsync(sb);
