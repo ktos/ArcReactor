@@ -1,29 +1,29 @@
 /*
-* ArcReactor
-*
-* Copyright (C) Marcin Badurowicz <m at badurowicz dot net> 2017
-*
-*
-* Permission is hereby granted, free of charge, to any person obtaining
-* a copy of this software and associated documentation files
-* (the "Software"), to deal in the Software without restriction,
-* including without limitation the rights to use, copy, modify, merge,
-* publish, distribute, sublicense, and/or sell copies of the Software,
-* and to permit persons to whom the Software is furnished to do so,
-* subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-* BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-* ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-* CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * ArcReactor
+ *
+ * Copyright (C) Marcin Badurowicz <m at badurowicz dot net> 2017
+ *
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files
+ * (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 #include <SoftwareSerial.h>
 #include <Adafruit_NeoPixel.h>
@@ -43,19 +43,25 @@ SoftwareSerial BTserial(8, 9); // RX | TX
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LEDS, PIN, NEO_GRB + NEO_KHZ800);
 
 uint32_t black = strip.Color(0, 0, 0);
+uint32_t red = strip.Color(255, 0, 0);
+uint32_t green = strip.Color(0, 255, 0);
+uint32_t blue = strip.Color(0, 0, 255);
 uint32_t cyan = strip.Color(CYAN_R, CYAN_B, CYAN_G);
 uint32_t cyan_dim = strip.Color(CYAN_R / 8, CYAN_G / 8, CYAN_B / 8);
+uint32_t cyan_dim2 = strip.Color(CYAN_R / 16, CYAN_G / 16, CYAN_B / 16);
 uint32_t halfWhite = strip.Color(150, 255, 255);
 uint32_t white = strip.Color(255, 255, 255);
 
 char tmpbuff[120] = "";
-char buffer[120] = "startup";
+char buffer[120] = "pulse";
 uint8_t bufflen = 7;
 
 const float AREF = 5.2;
 
 const int dim = 8;
+const int dim2 = 16;
 ColorPulser pulser(Color(CYAN_R / dim, CYAN_G / dim, CYAN_B / dim), Color(255 / dim, 255 / dim, 255 / dim));
+ColorPulser pulser2(Color(CYAN_R / dim, CYAN_G / dim, CYAN_B / dim), Color(255 / dim, 255 / dim, 255 / dim));
 
 void core(uint32_t color)
 {
@@ -81,7 +87,7 @@ int count = 0;
 
 void pulse()
 {
-	auto& c = pulser.Value();
+	auto &c = pulser.Value();
 	core(strip.Color(c.R, c.G, c.B));
 	ring(strip.Color(c.R, c.G, c.B));
 	delay(15);
@@ -90,7 +96,23 @@ void pulse()
 		count++;
 	}
 
-	if (count == 10) count = 0;
+	if (count == 10)
+		count = 0;
+}
+
+void pulse2()
+{
+	auto &c = pulser2.Value();
+	core(strip.Color(c.R, c.G, c.B));
+	ring(strip.Color(c.R, c.G, c.B));
+	delay(15);
+	if (!pulser2.Animate())
+	{
+		count++;
+	}
+
+	if (count == 10)
+		count = 0;
 }
 
 void startUp()
@@ -109,7 +131,8 @@ void batch()
 	uint16_t ledindex = 0;
 	int index = 1;
 
-	while (ledindex < LEDS) {
+	while (ledindex < LEDS)
+	{
 		Serial.print("LED ");
 		Serial.print(ledindex);
 		Serial.print(" set to ");
@@ -175,20 +198,6 @@ void battery()
 	strcpy(buffer, "pulse");
 }
 
-void setup()
-{
-	Serial.begin(9600);
-	BTserial.begin(38400);
-
-	pinMode(A0, INPUT);
-
-	strip.begin();
-
-	operationMode();
-
-	strip.show();
-}
-
 int index = 0;
 
 void operationMode()
@@ -199,9 +208,38 @@ void operationMode()
 	if (strcmp(buffer, "pulse") == 0)
 		pulse();
 
-	if (strcmp(buffer, "black") == 0) {
+	if (strcmp(buffer, "dim") == 0)
+	{
+		core(cyan_dim2);
+		ring(cyan_dim2);
+		strcpy(buffer, "nop");
+	}
+
+	if (strcmp(buffer, "black") == 0)
+	{
 		core(black);
 		ring(black);
+		strcpy(buffer, "nop");
+	}
+
+	if (strcmp(buffer, "green") == 0)
+	{
+		core(green);
+		ring(green);
+		strcpy(buffer, "nop");
+	}
+
+	if (strcmp(buffer, "blue") == 0)
+	{
+		core(blue);
+		ring(blue);
+		strcpy(buffer, "nop");
+	}
+
+	if (strcmp(buffer, "red") == 0)
+	{
+		core(red);
+		ring(red);
 		strcpy(buffer, "nop");
 	}
 
@@ -221,13 +259,28 @@ void operationMode()
 		setring();
 }
 
+void setup()
+{
+	Serial.begin(9600);
+	BTserial.begin(38400);
+
+	pinMode(A0, INPUT);
+
+	strip.begin();
+
+	operationMode();
+
+	strip.show();
+}
+
 void loop()
 {
 	if (BTserial.available() > 0)
 	{
 		tmpbuff[index] = BTserial.read();
 
-		if (tmpbuff[index] == '\n') {
+		if (tmpbuff[index] == '\n')
+		{
 
 			tmpbuff[index] = 0;
 			Serial.println(tmpbuff);
@@ -235,11 +288,13 @@ void loop()
 
 			memcpy(buffer, tmpbuff, 120);
 		}
-		else {
+		else
+		{
 			index++;
 		}
 	}
-	else {
+	else
+	{
 		operationMode();
 	}
 }
